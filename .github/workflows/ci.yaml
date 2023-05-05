@@ -45,3 +45,21 @@ jobs:
           context: .
           push: true
           tags: dmancloud/python-hello-world-app:v0.1.${{github.run_number}}
+
+      - name: Image Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'docker.io/dmancloud/python-hello-world-app:v0.1.${{github.run_number}}'
+          format: 'sarif'
+          output: 'trivy-image-results.sarif'
+#          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-image-results.sarif'
+          category: 'code'
